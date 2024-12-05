@@ -1,0 +1,43 @@
+# Directorios de datos
+/data/in
+/data/out
+
+# Librerías
+/Lib
+
+# Python bytecode files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Python environment files
+.Python
+env/
+venv/
+ENV/
+ENV.bak/
+venv.bak/
+
+# Spyder project files
+.spyderproject
+.spyproject
+
+# Cache files
+.mypy_cache/
+.pytest_cache/
+.tox/
+.ipynb_checkpoints
+
+.vscode/
+*.log
+.env
+
+# Archivos de compilación y distribución
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Archivos de caché de Jupyter Notebooks
+*.ipynb_checkpoints/

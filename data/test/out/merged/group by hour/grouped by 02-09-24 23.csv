@@ -1,0 +1,2 @@
+device_id;sent_time;received_time;msg_type;lat;lon;hour
+229111;02/09/2024 23:57:47;30/09/2024 23:57:51;poll_msg;38.38409;-2.6893976;2024-09-02 23:00:00
