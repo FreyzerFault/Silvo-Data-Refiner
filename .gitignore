@@ -1,9 +1,11 @@
 # Directorios de datos
-/data/in/*
-/data/out/*
+/data/in/**.csv
+/data/out/**/*.csv
 
 # Librerías
-/Lib
+/Lib/site-packages/*
+!/Lib/site-packages/pip/
+!/Lib/site-packages/pip-23.2.1.dist-info/
 
 # Python bytecode files
 *.pyc
