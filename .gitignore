@@ -1,6 +1,6 @@
 # Directorios de datos
-/data/in
-/data/out
+/data/in/*
+/data/out/*
 
 # Librerías
 /Lib
