@@ -109,7 +109,7 @@ def group_by():
     
     # Carpeta donde se guardaran los archivos
     dir_name = f'group by {group_by_column}'
-    dir_path = os.path.join(os.path.dirname(merged_file_path), dir_name)
+    dir_path = os.path.join(out_data_root, dir_name)
     
     grouped_file_paths = group_by_to_files(merged_file_path, group_by_column, dir_path)
     grouped_file_names = [os.path.basename(file) for file in grouped_file_paths]

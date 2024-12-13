@@ -4,7 +4,8 @@ from src.file_manager import read_csv, write_csv
 from src.utils import colorize, str_to_time
 from src.sort import sort_by
 
-# ======================== CHECK COLUMNS ========================
+
+#region ==================== CHECK COLUMNS ========================
 required_columns = ['device_id', 'time', 'msg_type', 'position_time', 'lat', 'lon']
 
 def check_required_columns(df):
@@ -14,35 +15,10 @@ def check_required_columns(df):
       return False
   return True
 
-# ======================================================
+#endregion
 
 
-# ====================== MSG TYPES ======================
-
-msg_types_identifiers = {
-  'seq_msg':    ['seq'],
-  'poll_msg':   ['poll'],
-  'warn_msg':   ['warn'],
-  'zap_msg':    ['zap', 'pulse'],
-  'status_msg': ['status'],
-}
-
-unknown_msg = 'unknown'
-unknown_messages_found = []
-
-def fix_msg_type(value):
-  for enum_value, identifiers in msg_types_identifiers.items():
-    for identifier in identifiers:
-      if identifier in value:
-        return enum_value
-  
-  unknown_messages_found.append(value)
-  return unknown_msg
-
-# ======================================================
-
-
-# ======================== TIME ========================
+#region ======================== TIME ========================
 
 
 cached_time_formats = {}
@@ -59,10 +35,10 @@ def fix_time_format(value: str | pd.Timestamp) -> pd.Timestamp | None:
   cached_time_formats[value] = time
   return time
 
-# ======================================================
+#endregion
 
 
-# ======================== LAT LON ========================
+#region ====================== LAT LON ========================
 
 def fix_lat(value):
   return fix_lat_lon_format(value, 2)
@@ -82,10 +58,70 @@ def fix_lat_lon_format(value, integer_digits):
     pass  # Handle the case where conversion to float fails
   return value
 
-# ======================================================
+#endregion
 
 
-# ====================== REFACTOR ======================
+#region ===================== ENUM ======================
+
+unknown_msg = 'unknown'
+empty_msg = ''
+unknown_enum_found = {
+  "msg_type": set(),
+  "collar_status": set(),
+  "fence_status": set(),
+  "mode": set()
+}
+
+msg_types_identifiers = {
+  'seq_msg':    ['seq'],
+  'poll_msg':   ['poll'],
+  'warn_msg':   ['warn'],
+  'zap_msg':    ['zap', 'pulse'],
+  'status_msg': ['status'],
+}
+
+mode_identifiers = {
+  'fence':    ['Fence'],
+  'trace':    ['Trace'],
+  'teach':    ['Teach'],
+}
+
+collar_status_identifiers = {
+  'normal':    ['Normal'],
+  'sleep':   ['Sleep'],
+  'power_off':    ['PowerOff', 'Off'],
+  'off_animal': ['OffAnimal'],
+}
+
+fence_status_identifiers = {
+  'normal':    ['FenceStatus_Normal', 'Normal'],
+}
+
+fix_msg_type = lambda value: fix_enum('msg_type', value, msg_types_identifiers)
+fix_mode = lambda value: fix_enum('mode', value, mode_identifiers)
+fix_collar_status = lambda value: fix_enum('collar_status', value, collar_status_identifiers)
+fix_fence_status = lambda value: fix_enum('fence_status', value, fence_status_identifiers)
+
+def fix_enum(column_name: str, value: str, enum_values: dict):
+  if value == '' or value == None or value == 'nan':
+    return ''
+  
+  if type(value) != str:
+    unknown_enum_found[column_name].add(f"{value} ({type(value)})")
+    return unknown_msg
+  
+  for enum_value, identifiers in enum_values.items():
+    for identifier in identifiers:
+      if identifier.lower() in value.lower():
+        return enum_value
+  
+  unknown_enum_found[column_name].add(value)
+  return unknown_msg
+
+#endregion
+
+
+#region ====================== REFACTOR ======================
 
 fixes = {
   'device_id': None,
@@ -94,6 +130,9 @@ fixes = {
   'msg_type': fix_msg_type,
   'lon': fix_lon,
   'lat': fix_lat,
+  'mode': fix_mode,
+  'collar_status': fix_collar_status,
+  'fence_status': fix_fence_status,
 }
 
 def refactor_data(df: pd.DataFrame):
@@ -107,14 +146,18 @@ def refactor_data(df: pd.DataFrame):
       df[column] = df[column].apply(fix_function)
   
   # UNKNOWN MSG TYPEs
-  if unknown_messages_found:
-    print(colorize(f"Unknown message types found: {unknown_messages_found}", 'yellow'))
+  for column, unknown_msgs in unknown_enum_found.items():
+    if len(unknown_msgs) > 0:
+      print(colorize(f"Unknown {column} found: {unknown_msgs}", 'yellow'))
   
   # Rename columns
   df.rename(columns={'time': 'received_time', 'position_time': 'sent_time'}, inplace=True)
   
   # Reorder columns
-  df = df[['device_id', 'sent_time', 'received_time', 'msg_type', 'lat', 'lon']]
+  required_columns = ['device_id', 'sent_time', 'received_time', 'msg_type', 'lat', 'lon']
+  optional_columns = ['mode', 'collar_status', 'fence_status']
+  optional_columns = [column for column in optional_columns if column in df.columns]
+  df = df[required_columns + optional_columns]
   
   # Sort by device_id and sent_time
   df = sort_by(df, ['device_id', 'sent_time'])
@@ -128,4 +171,4 @@ def refactor_data_file(in_path, out_path):
   write_csv(df, out_path)
   return out_path
 
-# ======================================================
+#endregion

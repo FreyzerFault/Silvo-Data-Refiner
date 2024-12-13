@@ -49,7 +49,7 @@ def group_by_to_files(file_path: str, column: str, dir_path: str) -> list[str]:
   # Cada grupo de datos se guarda en un archivo con el nombre del valor por el que se agrupa
   for split_df in grouped_dfs:
     first_value = split_df[column].iloc[0]
-    file_name = f"grouped by {str(first_value).replace(':', '.')}.csv"
+    file_name = f"{column}: {str(first_value).replace(':', '.')}.csv"
     
     file_path = os.path.join(dir_path, file_name)
     out_file_paths.append(file_path)
