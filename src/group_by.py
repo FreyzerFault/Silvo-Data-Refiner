@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from src.utils import colorize
 from src.file_manager import read_csv, write_csv
+from src.goat_name import get_goat_name
 
 def group_by(df: pd.DataFrame, column: str) -> list[pd.DataFrame]:
   # Group By si no son columnas especiales (dia, mes, hora...)
@@ -33,6 +34,10 @@ def group_by_to_files(file_path: str, column: str, dir_path: str) -> list[str]:
   # Si no existe la carpeta se crea
   os.makedirs(dir_path, exist_ok=True)
   
+  # Vaciar carpeta si ya existe
+  for file in os.listdir(dir_path):
+    os.remove(os.path.join(dir_path, file))
+  
   # Función para dividir los datos
   default_group_by_func = lambda df: group_by(df, column)
   group_by_funcs = {
@@ -47,9 +52,15 @@ def group_by_to_files(file_path: str, column: str, dir_path: str) -> list[str]:
   out_file_paths = []
   
   # Cada grupo de datos se guarda en un archivo con el nombre del valor por el que se agrupa
-  for split_df in grouped_dfs:
+  for index, split_df in enumerate(grouped_dfs):
     first_value = split_df[column].iloc[0]
-    file_name = f"{column}: {str(first_value).replace(':', '.')}.csv"
+    
+    if column == 'device_id':
+      file_name = f"{get_goat_name(-1 if index > 10 else index)} - {str(first_value).replace(':', '.')}.csv"
+    else:
+      file_name = f"{column} - {str(first_value).replace(':', '.')}.csv"
+    
+    
     
     file_path = os.path.join(dir_path, file_name)
     out_file_paths.append(file_path)

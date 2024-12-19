@@ -1,6 +1,7 @@
 # Directorios de datos
 /data/in/**.csv
 /data/out/**/*.csv
+/data/test/out/**/*
 
 # Librerías
 /Lib/site-packages/*
@@ -43,3 +44,4 @@ dist/
 
 # Archivos de caché de Jupyter Notebooks
 *.ipynb_checkpoints/
+

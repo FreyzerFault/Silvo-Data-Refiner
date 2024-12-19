@@ -95,6 +95,9 @@ collar_status_identifiers = {
 
 fence_status_identifiers = {
   'normal':    ['FenceStatus_Normal', 'Normal'],
+  'not_started': ['NotStarted'],
+  'maybe_out': ['MaybeOutOfFence'],
+  'escaped': ['Escaped'],
 }
 
 fix_msg_type = lambda value: fix_enum('msg_type', value, msg_types_identifiers)
