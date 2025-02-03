@@ -1,0 +1,6 @@
+[console_scripts]
+group-by = src.main:group_by_only
+merge = src.main:merge_only
+refactor = src.main:refactor_only
+run-all = src.main:main
+sort_by = src.main:sort_only

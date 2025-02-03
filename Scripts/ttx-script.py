@@ -1,10 +1,10 @@
 #!"C:\Users\dalcanta\Proyectos\SILVO-PIRO\Datos Collares\Scripts\python.exe"
-# EASY-INSTALL-ENTRY-SCRIPT: 'fonttools==4.55.1','console_scripts','ttx'
+# EASY-INSTALL-ENTRY-SCRIPT: 'fonttools','console_scripts','ttx'
 import re
 import sys
 
 # for compatibility with easy_install; see #2198
-__requires__ = 'fonttools==4.55.1'
+__requires__ = 'fonttools'
 
 try:
     from importlib.metadata import distribution
@@ -30,4 +30,4 @@ globals().setdefault('load_entry_point', importlib_load_entry_point)
 
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
-    sys.exit(load_entry_point('fonttools==4.55.1', 'console_scripts', 'ttx')())
+    sys.exit(load_entry_point('fonttools', 'console_scripts', 'ttx')())

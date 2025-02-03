@@ -4,5 +4,6 @@
   },
   "search.exclude": {
     "**/*.csv": true
-  }
+  },
+  "python.envFile": "${workspaceFolder}/.env"
 }

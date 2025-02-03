@@ -1,120 +1,173 @@
 import os
 import pandas as pd
-import argparse
 
-from src.file_manager import get_files, print_files
-from src.utils import colorize
+from utils.file_manager import get_files_by_extension, get_file_paths_by_extension, print_files, read_csv, write_csv
+from utils.utils import colorize
+from utils.config import Config
 
-from src.refactor import refactor_data_file
-from src.merge import merge_csv_files
-from src.group_by import group_by_to_files
-
-# TODO: Crear archivos .spp para Unity
+from data_operations.refactor import refactor, add_end_date
+from data_operations.merge import merge_csv_files, merge
+from data_operations.group_by import group_by_to_files
+from data_operations.sort import sort_by
 
 # ======================== CONFIG ========================
 
-# -t o --test to run the script in test mode
-argparser = argparse.ArgumentParser(description='Clean and split collar data')
-argparser.add_argument('-t', '--test', action='store_true', help='Run the script in test mode')
+args = Config.parse_args()
 
-test_mode = argparser.parse_args().test
-
-doRefactor = True
-doMerge = True
-doSplit = True
-
-# Filtros para separar los datos en distintos archivos
-# (por cuestiones de memoria ya que en total son miles de registros)
-group_by_columns = [
-  'msg_type', 
-  'device_id', 
-  'hour', 
-  'day', 
-  'month'
-]
+settings_file = 'settings.yaml'
+settings = Config.config_file(settings_file)
+print(colorize(f"Settings loaded from {settings_file}", 'green'))
 
 # PATHS:
-in_data_root = './data/in' if not test_mode else './data/test/in/'
-out_data_root = './data/out' if not test_mode else './data/test/out/'
-merged_file_path = os.path.join(out_data_root, f'merged/merged_data.csv')
+paths = settings['paths']
+in_data_root = paths['raw_data'] if not Config.test_mode else paths['test_raw_data']
+out_data_root = paths['processed_data'] if not Config.test_mode else paths['test_processed_data']
+merged_file_path = os.path.join(out_data_root, paths['merged_data_subpath'])
 
 os.makedirs(in_data_root, exist_ok=True)
 os.makedirs(out_data_root, exist_ok=True)
 os.makedirs(os.path.dirname(merged_file_path), exist_ok=True)
 
+# Pipeline Flags:
+pipeline = settings['pipeline']
+active_transf = pipeline['active_transformations']
+
+# Filtros para separar los datos en distintos archivos
+# (por cuestiones de memoria ya que en total son miles de registros)
+group_by_columns = pipeline['group_by']
+
+# Ordenar todos los datos por las columnas especificadas
+sort_by_columns = [by['column']for by in pipeline['sort_by']]
+sort_by_orders = [by['order']for by in pipeline['sort_by']]
+
 # ======================================================
 
+
+#region ========================= MAIN =========================
+
 def main():
-  if test_mode:
-    print(f'Running in test mode')
+  
+  if Config.test_mode:
+    print()
+    print(colorize(f'==================== Running in test mode ====================', 'blue'))
     print()
   
-  # Process Files
-  if doRefactor:
-    refactor()
+  in_file_paths = get_file_paths_by_extension(in_data_root)
+  dfs = []
+  
+  # Read and clean/refactor each file
+  for in_file_path in in_file_paths:
+    
+    df = read_csv(in_file_path)
+    if df is None:
+      continue
+    
+    df = refactor(df)
+    df = sort_by(df, sort_by_columns, sort_by_orders)
+    dfs.append(df)
+  
+  # Merge all files
+  df = merge(dfs)
+  df = add_end_date(df)
+  groups = group_by(df)
+  
+  
+  # TODO Filter Null Positions
 
-  # Merge Files
-  if doMerge:
-    merge()
 
-  # Split Files
-  if doSplit:
-    group_by()
+#endregion ======================================================
 
 
-def refactor():
-  in_files = get_files(in_data_root)
+#region ========================= UNIT OPERATIONS =========================
+
+def sort(df: pd.DataFrame) -> dict[str, list[pd.DataFrame]]:
+  return sort_by(df, sort_by_columns)
+
+
+def group_by(df: pd.DataFrame):
+  grouped_results = group_by_to_files(df, group_by_columns, out_data_root)
+  
+  for column, result in grouped_results.items():
+    print()
+    print(colorize(f"Group by {column} (saved to {result['dir_path']}):", 'blue'))
+    print_files(result['files'])
+    print()
+  
+  return {col: group['dfs'] for col, group in grouped_results.items()}
+
+#region ============= Stand Alone Functions for testing =============
+
+def refactor_only():
+  in_files = get_files_by_extension(in_data_root)
+  
+  print()
   print(colorize(f"Refactoring files from {in_data_root}:", 'blue'))
   print_files([os.path.basename(file) for file in in_files])
   print()
   
-  out_files = []
+  for file in in_files:
+    df = read_csv(os.path.join(in_data_root, file))
+    df = refactor(df)
+    write_csv(df, os.path.join(out_data_root, file))
   
-  for file_path in in_files:
-    fixed_path = refactor_data_file(file_path, out_data_root)
-    out_files.append(os.path.basename(fixed_path))
-  
-  print(colorize(f"Refactored data saved in {os.path.basename(out_data_root)}", 'green'))
-  print_files(out_files)
+  print(colorize(f"Refactored data saved in {out_data_root}", 'green'))
+  print_files(in_files)
   print()
 
 
-def merge():
-  # Input: Files in out except merged
-  in_files = get_files(out_data_root)
-  
-  if merged_file_path in in_files:
-    in_files.remove(merged_file_path)
-  
+def merge_only():
+  # Input: out files
+  in_files = get_files_by_extension(out_data_root)
+  in_file_paths = [os.path.join(out_data_root, file) for file in in_files]
+    
   if len(in_files) == 0:
     print(colorize('No files to merge', 'yellow'))
     return
   
   print(colorize(f"Merging files from {out_data_root}:", 'blue'))
-  print_files([os.path.basename(file) for file in in_files])
+  print_files(in_files)
   print()
   
-  merge_csv_files(in_files, merged_file_path)
+  merge_csv_files(in_file_paths, merged_file_path)
   
   print(colorize(f"Merged data saved in {merged_file_path}", 'green'))
   print_files([os.path.basename(merged_file_path)])
   print()
 
-def group_by():
+
+def sort_only():
+  # Input: merged file
+  file_path = merged_file_path
+    
+  if not os.path.exists(file_path):
+    print(colorize(f'File not found to sort: {file_path}', 'yellow'))
+    return
+  
+  print(colorize(f"Sorting file {merged_file_path}", 'blue'))
+  print()
+  
+  df = read_csv(file_path)
+  df = sort(df)
+  write_csv(df, file_path)
+  
+  print(colorize(f"Sorted data saved in file {merged_file_path}", 'green'))
+  print()
+
+
+def group_by_only():
+  if not os.path.exists(merged_file_path):
+    print(colorize('No merged file to split', 'yellow'))
+    return
+  
   print(colorize(f"Splitting file {merged_file_path} by:", 'blue'))
-  print(colorize(f"\t{str.join(', ', group_by_columns)}", 'blue'))
-  print()
+  df = read_csv(merged_file_path)
   
-  for group_by_column in group_by_columns:
-    
-    # Carpeta donde se guardaran los archivos
-    dir_name = f'group by {group_by_column}'
-    dir_path = os.path.join(out_data_root, dir_name)
-    
-    grouped_file_paths = group_by_to_files(merged_file_path, group_by_column, dir_path)
-    grouped_file_names = [os.path.basename(file) for file in grouped_file_paths]
-    
-    print(colorize(f"Saved in {dir_path}:", 'green'))
-    print_files(grouped_file_names)
-  print()
-  
+  group_by(df)
+
+#endregion ======================================================
+
+#endregion ======================================================
+
+
+if __name__ == '__main__':
+  main()

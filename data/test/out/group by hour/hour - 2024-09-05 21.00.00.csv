@@ -1,0 +1,2 @@
+device_id,sent_time,received_time,msg_type,lat,lon,mode,collar_status,fence_status,end_date,day,month,hour
+229175,05/09/2024 21:36:32,02/09/2024 22:00:59,warn_msg,38.3842371,-2.6895191,fence,sleep,normal,05/09/2024 22:01:07,05/09/2024 00:00:00,9,05/09/2024 21:00:00

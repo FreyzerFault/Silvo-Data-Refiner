@@ -1,0 +1,51 @@
+# Configuración general del proyecto
+project:
+  name: SILVO-PIRO
+  version: 1.0.0
+
+# Configuración de rutas de archivos
+paths:
+  raw_data: ./data/in
+  processed_data: ./data/out
+  test_raw_data: ./data/test/in
+  test_processed_data: ./data/test/out
+  merged_data_subpath: merged/merged_data.csv
+
+# Pipeline processes
+pipeline:
+  separator: ','
+  date_format: '%d/%m/%Y %H:%M:%S'
+
+  active_transformations:
+    # Fecha del siguiente punto. Precalculado para animar en QGIS de forma más eficiente.
+    # Si se usa en QGIS da una mejor precisión temporal y mejor visualización.
+    - add_end_date: true
+
+    # Por ahora no veo la utilidad a mensajes sin posición registrada (seq_msg)
+    # Quizá deberíamos estudiar qué utilidad tienen (cambios de estado del vallado?)
+    - filter_null_positions: true
+
+  # Categorías en las que dividir para aligerar su peso y agilizar el uso en QGIS o Unity
+  group_by:
+    - 'device_id'
+    - 'msg_type'
+    - 'day'
+    - 'month'
+    - 'hour'
+
+  # group_by:
+  #   - column: 'device_id'
+  #   - column: 'msg_type'
+  #   - column: 'sent_time'
+  #     unit: 'day'
+  #   - column: 'sent_time'
+  #     unit: 'month'
+  #   - column: 'sent_time'
+  #     unit: 'hour'
+
+  # Ordenar todos los datos por device_id y sent_time
+  sort_by:
+    - column: 'device_id'
+      order: 'asc'
+    - column: 'sent_time'
+      order: 'asc'

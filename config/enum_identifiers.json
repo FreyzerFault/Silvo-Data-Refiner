@@ -1,0 +1,26 @@
+{
+  "msg_type": {
+    "seq_msg": ["seq"],
+    "poll_msg": ["poll"],
+    "warn_msg": ["warn"],
+    "zap_msg": ["zap", "pulse"],
+    "status_msg": ["status"]
+  },
+  "mode": {
+    "fence": ["Fence"],
+    "trace": ["Trace"],
+    "teach": ["Teach"]
+  },
+  "collar_status": {
+    "normal": ["Normal"],
+    "sleep": ["Sleep"],
+    "power_off": ["PowerOff", "Off"],
+    "off_animal": ["OffAnimal"]
+  },
+  "fence_status": {
+    "normal": ["FenceStatus_Normal", "Normal"],
+    "not_started": ["NotStarted"],
+    "maybe_out": ["MaybeOutOfFence"],
+    "escaped": ["Escaped"]
+  }
+}

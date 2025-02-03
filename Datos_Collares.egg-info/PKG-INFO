@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: Datos-Collares
+Version: 0.1
+Requires-Dist: pytest
+Requires-Dist: pandas
+Requires-Dist: geopandas
+Requires-Dist: matplotlib

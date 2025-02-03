@@ -1,0 +1,2 @@
+device_id,sent_time,received_time,msg_type,lat,lon,mode,collar_status,fence_status,end_date,day,month,hour
+229175,22/09/2024 21:39:27,02/09/2024 21:59:12,poll_msg,38.3843361,-2.689489,teach,sleep,normal,30/09/2024 21:32:57,22/09/2024 00:00:00,9,22/09/2024 21:00:00
