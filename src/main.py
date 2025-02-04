@@ -7,7 +7,7 @@ from utils.config import Config
 
 from data_operations.refactor import refactor, add_end_date
 from data_operations.merge import merge_csv_files, merge
-from data_operations.group_by import group_by_to_files
+from data_operations.group_by import group_by_to_files, Grouper
 from data_operations.sort import sort_by
 
 # ======================== CONFIG ========================
@@ -49,7 +49,7 @@ def main():
   
   if Config.test_mode:
     print()
-    print(colorize(f'==================== Running in test mode ====================', 'blue'))
+    print(colorize('==================== Running in test mode ====================', 'blue'))
     print()
   
   in_file_paths = get_file_paths_by_extension(in_data_root)
@@ -70,6 +70,8 @@ def main():
   df = merge(dfs)
   df = add_end_date(df)
   groups = group_by(df)
+
+  print(f"{len(groups)} Group By hechos:\n\t{''.join(f"{key}: {len(group)} datasets" for key, group in groups.items())}")
   
   
   # TODO Filter Null Positions
@@ -84,7 +86,7 @@ def sort(df: pd.DataFrame) -> dict[str, list[pd.DataFrame]]:
   return sort_by(df, sort_by_columns)
 
 
-def group_by(df: pd.DataFrame):
+def group_by(df: pd.DataFrame) -> dict[str, list[pd.DataFrame]]:
   grouped_results = group_by_to_files(df, group_by_columns, out_data_root)
   
   for column, result in grouped_results.items():
