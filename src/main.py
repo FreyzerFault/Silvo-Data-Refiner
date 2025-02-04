@@ -65,11 +65,12 @@ def main():
     
     df = refactor(df)
     df = sort_by(df, sort_by_columns, sort_by_orders)
+    df = add_end_date(df)
     dfs.append(df)
   
   # Merge all files
   df = merge(dfs)
-  df = add_end_date(df)
+  df = sort_by(df, sort_by_columns, sort_by_orders)
   groups = group_by(df)
 
   print(f"{len(groups)} Group By hechos:\n\t{''.join(f"{key}: {len(group)} datasets" for key, group in groups.items())}")

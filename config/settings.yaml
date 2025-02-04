@@ -1,8 +1,3 @@
-# Configuración general del proyecto
-project:
-  name: SILVO-PIRO
-  version: 1.0.0
-
 # Configuración de rutas de archivos
 paths:
   raw_data: ./data/in
@@ -32,16 +27,6 @@ pipeline:
     - 'day'
     - 'month'
     - 'hour'
-
-  # group_by:
-  #   - column: 'device_id'
-  #   - column: 'msg_type'
-  #   - column: 'sent_time'
-  #     unit: 'day'
-  #   - column: 'sent_time'
-  #     unit: 'month'
-  #   - column: 'sent_time'
-  #     unit: 'hour'
 
   # Ordenar todos los datos por device_id y sent_time
   sort_by:
