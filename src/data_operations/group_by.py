@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from typing import List, Callable
-from utils.utils import colorize
+from utils.utils import print_colorized
 from utils.file_manager import read_csv, write_csv, ensure_dir_exists
 from src.goat_enhancer import get_goat_name
 from typing import TypedDict
@@ -25,7 +25,7 @@ class GroupBy:
     """
     
     if self.column not in df.columns:
-      print(colorize(f"The column '{self.column}' is not present in {df.columns}.", 'red'))
+      print_colorized(f"The column '{self.column}' is not present in {df.columns}.", 'red')
       return []
     
     return [group for _, group in df.groupby([self.column])]

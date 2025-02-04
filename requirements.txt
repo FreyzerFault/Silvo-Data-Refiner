@@ -1,4 +1,7 @@
+setuptools
+colorama
+pyyaml
 pytest
 pandas
 geopandas
-matplotlib
+python-dateutil

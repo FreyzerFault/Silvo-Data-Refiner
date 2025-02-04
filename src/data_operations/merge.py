@@ -1,5 +1,4 @@
 import pandas as pd
-from data_operations.sort import sort_by_id_and_time
 from utils.file_manager import read_csv, write_csv
 
 def merge(dfs: list[pd.DataFrame]) -> pd.DataFrame:

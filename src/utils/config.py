@@ -1,5 +1,6 @@
 import argparse
 import os, json, yaml
+from .utils import print_colorized
 
 class Config:
   
@@ -14,10 +15,13 @@ class Config:
   config_dir = './config'
   
   def config_file(filename) -> dict | str :
-    with open(os.path.join(Config.config_dir, filename), 'r') as f:
+    file_path = os.path.join(Config.config_dir, filename)
+    with open(file_path, 'r') as f:
       
       data = f.read()
       ext = os.path.splitext(filename)[1]
+      
+      print_colorized(f"Reading Config file:{file_path}", 'blue')
       
       if ext == '.json':
         return json.loads(data)

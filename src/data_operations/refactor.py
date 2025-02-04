@@ -2,7 +2,7 @@ import os, json
 import pandas as pd
 from utils.config import Config
 from utils.file_manager import read_csv, write_csv
-from utils.utils import colorize, str_to_time
+from utils.utils import print_colorized, str_to_time
 from data_operations.sort import sort_by
 from data_operations.creation import add_end_date
 
@@ -13,7 +13,7 @@ required_columns = ['device_id', 'time', 'msg_type', 'position_time', 'lat', 'lo
 def has_required_columns(df):
   for column in required_columns:
     if not column in df.columns:
-      print(colorize(f"The required column '{column}' is not present in the file.", 'red'))
+      print_colorized(f"The required column '{column}' is not present in the file.", 'red')
       return False
   return True
 
@@ -87,7 +87,7 @@ unknown_enum_found = {
 def show_unknown_enum_found():
   for column, unknown_msgs in unknown_enum_found.items():
     if len(unknown_msgs) > 0:
-      print(colorize(f"Unknown {column} found: {unknown_msgs}", 'yellow'))
+      print_colorized(f"Unknown {column} found: {unknown_msgs}", 'yellow')
 
 
 def fix_enum(column_name: str, value: str, enum_values: dict):
@@ -126,7 +126,7 @@ fixes = {
 
 def refactor(df: pd.DataFrame) -> pd.DataFrame:
   if not has_required_columns(df):
-    print(colorize(f"DATA INVALID. The required columns are not present in the file. {required_columns}", 'red'))
+    print_colorized(f"DATA INVALID. The required columns are not present in the file. {required_columns}", 'red')
     return
 
   # FIXES => Apply fix function to each column

@@ -18,6 +18,8 @@ def colorize(text, color):
   color_code = color_dict.get(color.lower(), Fore.RESET)
   return f"{color_code}{text}{Style.RESET_ALL}"
 
+def print_colorized(text, color = 'blue'):
+  print(colorize(text, color))
 
 def time_to_str(time: pd.Timestamp, date_format = '%d/%m/%Y %H:%M:%S') -> str:
   if pd.isnull(time):

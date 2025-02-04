@@ -1,5 +1,5 @@
 import pandas as pd
-from utils.utils import colorize
+from utils.utils import print_colorized
 
 def sort_by(df: pd.DataFrame, columns: list[str] | str = ['device_id', 'sent_time'], order: list[str] | str = ['asc', 'asc']) -> pd.DataFrame:  
   columns = columns if isinstance(columns, list) else [columns]
@@ -10,7 +10,7 @@ def sort_by(df: pd.DataFrame, columns: list[str] | str = ['device_id', 'sent_tim
     if not pair[0] in df.columns:
       col_not_found = columns.pop(i)
       order.pop(i) 
-      print(colorize(f"\nColumn not found in DataFrame while Sorting: {col_not_found}\n", 'yellow'))
+      print_colorized(f"\nColumn not found in DataFrame while Sorting: {col_not_found}\n", 'yellow')
   
   return df.sort_values(by=columns, ascending=list(map(lambda o: o == 'asc', order)))
 
