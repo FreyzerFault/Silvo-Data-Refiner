@@ -1,5 +1,9 @@
 # Silvo Data Refiner
 
+Procesamiento de Datos de Collares Inteligentes en Silvopastoralismo
+
+<img src="./Silvo%20Data%20Refiner%20Icon.png" alt="Silvo Data Refiner Icon" width="50%" style="margin-left:auto;margin-right:auto;display:block">
+
 ## Descripción
 
 Silvo Data Refiner es una herramienta de procesamiento de datos de collares inteligentes.
@@ -8,41 +12,58 @@ Se encarga de limpiar, ordenar y juntar los datos para su uso consistente en otr
 
 También permite agrupar todos los datos por atributos. Por ejemplo, por ID o por mes.
 
-Toda la configuración referente al procesamiento de estos está en **/config/settings.yaml**.
-
-## Datos
+## Uso
 
 Inserta los datos CSV en la carpeta **/data/in/**.
 
 Los resultados se almacenan en **/data/out**.
 
-Si quieres configurar otras rutas puedes modificar **/config/settings.yaml**.
+Puedes ejecutar todo el proceso con el archivo **run.bat**
 
-Por ahora la estructura de los Datos requiere de las siguientes columnas (formato de collares NoFence):
+Si quieres configurar otras rutas, además de otros parámetros, puedes modificar **/config/settings.yaml**.
+
+## Datos de Entrada
+
+Por ahora la estructura de los Datos de Entrada requiere de las siguientes columnas (formato de collares NoFence):
 
 | device_id | position_time | time | msg_type | lat | lon | ... |
 |-|-|-|-|-|-|-|
-|2024-09-02 21:58:20+00:00|229175|poll_msg|2024-09-30 21:32:57+00:00|38.3843833|-2.6894614| ... |
-
----
-
-Para su uso posterior he decidido renombrar:
-
-- position_time -> sent_time
-- time -> received_time
+|229175|2024-09-02 21:58:20+00:00|2024-09-30 21:32:57+00:00|poll_msg|38.3843833|-2.6894614| ... |
 
 ## Pipeline
 
 Para cada dataset de entrada:
 
-- **Refactoriza** los datos ordenando las columnas y asignándoles nombres de columnas consistentes.
-- **Reformatea** las fechas a un formato consistente entre todos los dataset
-- **Ordena** los dataset por ID y sent_time (configurable)
-- Añade una columna **end_date** (fecha y hora del siguiente elemento en orden para usarla en QGIS)
+### Refactorizado
 
-Todos los dataset se **juntan** en uno y se vuelve a ordenar por ID y sent_time (configurable).
+Ordena y renombra las columnas de forma consistente.
 
-Luego se agrupa por los atributos más relevantes:
+Renombrados:
+
+- position_time -> sent_time
+- time -> received_time
+
+### Reformateo de fechas
+
+Para seguir un formato consistente entre todos los dataset.
+
+### Ordenado
+
+Por ID y sent_time (configurable en *settings.yaml*)
+
+### Columnas Extra
+
+Se añade una columna **end_date** (fecha y hora del siguiente elemento en orden para usarla en QGIS)
+
+### Unión de datasets
+
+Se **unen** en uno y se vuelve a ordenar por ID y sent_time (configurable en *settings.yaml*).
+
+El resultado se guarda en *out/merged/merged.csv*
+
+### Agrupación
+
+Se agrupa por los atributos más relevantes (configurable en *settings.yaml*):
 
 - ID
 - Mes
@@ -50,13 +71,11 @@ Luego se agrupa por los atributos más relevantes:
 - Tipo de mensaje
 - ...
 
-Se agrupan para obtener archivos más pequeños para usar en posteriores procesos de forma más eficiente y legible. En QGIS por ejemplo.
+Se agrupan para obtener archivos más pequeños para usar en posteriores procesos de forma más eficiente y legible. En QGIS ayuda a su uso ágil.
 
-## Uso
+Los resultados se guardan en *out/group by [columna]/[valor].csv*
 
-Puedes ejecutar todo el proceso con el archivo **run.bat**
-
-## Instalación
+## Instalación del Entorno de Desarrollo
 
 Debes tener python 3 instalado.
 
@@ -94,19 +113,19 @@ run-all
 
 ## Testing
 
+Si los datos son demasiado pesados y el algoritmo tarda mucho en completarse puedes usar el modo testing:
+
 Usa **'-t'** para configurar como entrada los datasets dentro de **data/test/in** y sus resultados en **data/test/out**:
 
 ```shell
 run-all -t
 ```
 
----
-
 ## Conversor CSV a SHP
 
-Ubicación script: ./qgis_scripts/csv_to_shp.py
+Cuando tengas los datos procesados puedes convertirlos a SHP para usarlos en QGIS, por ejemplo, ejecutando este script.
 
-Convierte todos los archivos CSV de una carpeta a SHP.
+Ubicación: ./qgis_scripts/csv_to_shp.py
 
 ### Funcionamiento
 
