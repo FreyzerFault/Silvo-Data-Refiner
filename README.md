@@ -99,3 +99,39 @@ Usa **'-t'** para configurar como entrada los datasets dentro de **data/test/in*
 ```shell
 run-all -t
 ```
+
+---
+
+## Conversor CSV a SHP
+
+Ubicación script: ./qgis_scripts/csv_to_shp.py
+
+Convierte todos los archivos CSV de una carpeta a SHP.
+
+### Funcionamiento
+
+Inserta el script en la consola de QGIS (no funciona por sí solo sin QGIS).
+
+- Abre la Consola en QGIS
+- Pulsa en "Mostrar editor" y abre el script.
+- Pulsa en ejecutar
+
+### Configuración
+
+Al principio del script está toda la configuración.
+
+- **root**: con la ruta de la carpeta con todos los CSV que quieras convertir.
+- **debug**: Muestra por consola más información.
+- **overwrite_layer**: Si quieres sobrescribir SHPs ya generados anteriormente, y hay layers usándolos, sobrescribe las layers.
+(Si sobrescribes las layers perderán todo el estilo, queda pendiente solucionarlo pero no he sido capaz).
+- **params**: Parámetros del algoritmo usado. Si los datos del CSV tienen coordenadas distintas de **"lon"** y **"lat"**, con otra **proyección**. Para los datos de collares de este proyecto no será necesario.
+Si quieres filtrar qué archivos serán procesados de dentro de la carpeta root (**in_files**), puedes añadir los archivos que quieras usar. Déjalo vacío para que procese TODOS los CSVs.
+
+### Recomendación al Sobrescribir
+
+Abre otro **proyecto vacío** temporalmente, ejecútalo con **overwrite_layer = False**.
+
+>(Si lo ejecutas con *overwrite_layer = False* en el mismo proyecto dará un error al escribir los SHP porque no pueden modificarse mientras estén usándose por QGIS.)
+
+Vuelve a abrir el proyecto. La fuente de datos de las layers deberían haberse modificado automáticamente sin perder todo el estilo.
+

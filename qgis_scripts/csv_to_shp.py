@@ -11,6 +11,7 @@ from PyQt5.QtGui import *
 from qgis.core import *
 from qgis import processing
 
+# =======================================================================
 # =========== Cambia estos valores para adaptarlos a tu caso ===========
 
 root = "C:/Users/dalcanta/Proyectos/SILVO-PIRO/QGIS/Silvopastoralismo Andalucia/Collares/Collares por mes"
@@ -28,9 +29,10 @@ params = {
   'coordinate_fields': ('lon', 'lat'),
   
   # Si no se especifica, se usan todos los CSVs en la carpeta de entrada
-  'in_files': ['Collares Agosto']
+  'in_files': []
 }
 
+# =======================================================================
 # =======================================================================
 
 in_files = [(file + '.csv') for file in params['in_files']] if params['in_files'] else os.listdir(params['in_dir'])
