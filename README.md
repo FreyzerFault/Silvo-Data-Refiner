@@ -153,4 +153,3 @@ Abre otro **proyecto vacío** temporalmente, ejecútalo con **overwrite_layer = 
 >(Si lo ejecutas con *overwrite_layer = False* en el mismo proyecto dará un error al escribir los SHP porque no pueden modificarse mientras estén usándose por QGIS.)
 
 Vuelve a abrir el proyecto. La fuente de datos de las layers deberían haberse modificado automáticamente sin perder todo el estilo.
-
