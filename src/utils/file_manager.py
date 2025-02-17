@@ -13,7 +13,7 @@ def get_files_by_extension(dir_path: str, extension = '.csv') -> list[str]:
           if file.endswith(extension) and os.path.isfile(os.path.join(dir_path, file))]
 
 def print_files(files: list[str], max_files = 5):
-  print(colorize(f"\t- {str.join('\n\t- ', files)}", 'cyan'))
+  print(colorize(f"\t- {str.join('\n\t- ', files[:max_files] if len(files) > max_files else files)}", 'cyan'))
   if len(files) > max_files:
     print(f"\t... ({len(files) - max_files} more)")
 
@@ -35,11 +35,7 @@ date_format = '%d/%m/%Y %H:%M:%S'
 
 def read_csv(file_path) -> pd.DataFrame | None:
   try:
-    df = pd.read_csv(file_path, sep=None, engine='python', parse_dates=True)
-    for column in df.columns:
-      if 'time' in column and df.dtypes[column] == 'object':
-        df[column] = df[column].apply(str_to_time)
-    return df
+    return pd.read_csv(file_path, sep=None, engine='python', parse_dates=True)
   except Exception as e:
     print(colorize(f"An error occurred while reading the file: {e}", 'red'))
     return None

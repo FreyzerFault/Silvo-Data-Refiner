@@ -6,6 +6,16 @@ from utils.utils import print_colorized, str_to_time
 from data_operations.sort import sort_by
 from data_operations.creation import add_end_date
 
+#region ======================== DELETE ========================
+
+def delete_null_rows(df: pd.DataFrame, *columns) -> pd.DataFrame:
+  if columns:
+    df.dropna(axis=0, subset=list(columns), inplace=True)
+  else:
+    df.dropna(axis=0, how='all', inplace=True)
+
+#endregion
+
 
 #region ==================== CHECK COLUMNS ========================
 required_columns = ['device_id', 'time', 'msg_type', 'position_time', 'lat', 'lon']
@@ -54,7 +64,7 @@ def fix_lat_lon_format(value, integer_digits):
     decimal_digits = total_digits - integer_digits
     value = float(str(value).replace('.', '')) / (10 ** decimal_digits)
   except ValueError:
-    pass  # Handle the case where conversion to float fails
+    return 'nan'
   return value
 
 #endregion
@@ -91,7 +101,7 @@ def show_unknown_enum_found():
 
 
 def fix_enum(column_name: str, value: str, enum_values: dict):
-  if value == '' or value == None or value == 'nan':
+  if value == '' or value is None or pd.isna(value):
     return ''
   
   if type(value) != str:
@@ -124,7 +134,7 @@ fixes = {
   'fence_status': fix_fence_status,
 }
 
-def refactor(df: pd.DataFrame) -> pd.DataFrame:
+def refactor(df: pd.DataFrame) -> pd.DataFrame:  
   if not has_required_columns(df):
     print_colorized(f"DATA INVALID. The required columns are not present in the file. {required_columns}", 'red')
     return
@@ -134,8 +144,12 @@ def refactor(df: pd.DataFrame) -> pd.DataFrame:
     if column in df.columns and fix_function:
       df[column] = df[column].apply(fix_function)
   
-  # Check UNKNOWN MSG TYPEs => Print unknown values to fix it later
-  show_unknown_enum_found()
+  # Convert each column to its correct data type
+  for col in df.columns:    
+    if col in ['lat', 'lon']:
+      df[col] = df[col].astype(float)
+    elif col in ['msg_type', 'mode', 'collar_status', 'fence_status']:
+      df[col] = df[col].astype('category')
   
   # Rename columns
   df.rename(
@@ -154,9 +168,6 @@ def refactor(df: pd.DataFrame) -> pd.DataFrame:
   optional_columns = [column for column in optional_columns if column in df.columns]
   
   df = df[required_columns + optional_columns]
-  
-  # Sort by device_id and sent_time
-  df = sort_by(df, ['device_id', 'sent_time'])
   
   return df
 

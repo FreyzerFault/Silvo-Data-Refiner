@@ -1,11 +1,12 @@
-import os
+import os, sys
 import pandas as pd
+from tqdm import tqdm
 
 from utils.file_manager import get_files_by_extension, get_file_paths_by_extension, print_files, read_csv, write_csv
 from utils.utils import print_colorized
 from utils.config import Config
 
-from data_operations.refactor import refactor, add_end_date
+from data_operations.refactor import refactor, add_end_date, show_unknown_enum_found, delete_null_rows
 from data_operations.merge import merge_csv_files, merge
 from data_operations.group_by import group_by_to_files, Grouper
 from data_operations.sort import sort_by
@@ -47,7 +48,6 @@ sort_by_orders = [by['order']for by in pipeline['sort_by']]
 #region ========================= MAIN =========================
 
 def main():
-  
   if Config.test_mode:
     print()
     print_colorized('==================== Running in test mode ====================', 'blue')
@@ -56,24 +56,41 @@ def main():
   in_file_paths = get_file_paths_by_extension(in_data_root)
   dfs = []
   
+  print_files([os.path.basename(file) for file in in_file_paths])
+  print()
+  
   # Read and clean/refactor each file
-  for in_file_path in in_file_paths:
+  for i in tqdm(range(len(in_file_paths)), desc='Refactoring and preparing data', unit='file', colour='cyan'):
+    
+    in_file_path = in_file_paths[i]
     
     df = read_csv(in_file_path)
     if df is None:
       continue
     
     df = refactor(df)
+    delete_null_rows(df, 'sent_time', 'lat', 'lon')
     df = sort_by(df, sort_by_columns, sort_by_orders)
     df = add_end_date(df)
+    
+    # Check UNKNOWN MSG TYPEs => Print unknown values to fix it later
+    show_unknown_enum_found()
+    
     dfs.append(df)
+  
+  print()  
+  print_colorized(f"Merging {len(dfs)} files into 1...", 'cyan')
   
   # Merge all files
   df = merge(dfs)
   df = sort_by(df, sort_by_columns, sort_by_orders)
+  df = add_end_date(df)
+  
+  print_colorized(f"\nMerged {len(dfs)} files into 1:\t{merged_file_path}\n", 'green')
+    
   groups = group_by(df)
 
-  print(f"{len(groups)} Group By hechos:\n\t{''.join(f"{key}: {len(group)} datasets" for key, group in groups.items())}")
+  print_colorized(f"{len(groups)} Group By hechos:\n\t{', '.join(f"{key}: {len(group)} datasets" for key, group in groups.items())}", 'green')
   
   
   # TODO Filter Null Positions

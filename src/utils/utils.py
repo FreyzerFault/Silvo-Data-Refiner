@@ -1,6 +1,7 @@
 import pandas as pd
 from colorama import Back, Fore, Style
 
+#region ========================= LOGGING =========================
 def colorize(text, color):
   color_dict = {
     'red': Fore.RED,
@@ -18,8 +19,13 @@ def colorize(text, color):
   color_code = color_dict.get(color.lower(), Fore.RESET)
   return f"{color_code}{text}{Style.RESET_ALL}"
 
-def print_colorized(text, color = 'blue'):
-  print(colorize(text, color))
+def print_colorized(text, color = 'blue', end = '\n'):
+  print(colorize(text, color), end=end)
+
+#endregion ======================================================
+
+
+#region ========================= DATE =========================
 
 def time_to_str(time: pd.Timestamp, date_format = '%d/%m/%Y %H:%M:%S') -> str:
   if pd.isnull(time):
@@ -39,8 +45,9 @@ def str_to_time(value: str, date_format = '%d/%m/%Y %H:%M:%S') -> pd.Timestamp:
     
     dayfirst = True if len(split_date) == 1 or len(str(split_date[0])) == 2 else False
     time = pd.to_datetime(value, dayfirst=dayfirst)
+    time = unlocalize_utc_dt(time)
     return time
-  except ValueError:
+  except ValueError as e:
     pass
   
   # Try specifying different formats if the automatic conversion fails
@@ -48,10 +55,17 @@ def str_to_time(value: str, date_format = '%d/%m/%Y %H:%M:%S') -> pd.Timestamp:
   for fmt in formats:
     try:
       time = pd.to_datetime(value, format=fmt)
+      time = unlocalize_utc_dt(time)
       return time
-    except ValueError:
-      continue
+    except ValueError as e:
+      print(colorize(f"Could not fix the time format for value: {value}\n Error: {e}", 'yellow'))
   
   # If all formats fail, return the original value
-  print(colorize(f"Could not fix the time format for value: {value}", 'yellow'))
   return pd.Timestamp('NaT')
+
+def unlocalize_utc_dt(time: pd.Timestamp) -> pd.Timestamp:
+  if time.tzinfo is not None:
+    return time.tz_localize(None)
+  return time
+
+#endregion ======================================================
